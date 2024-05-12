@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<commands>
+	<addCategory
+		id="custom_1710245294710"
+		name="FreeCharts"
+		description=""
+		visible="true"
+		open="true"
+		nextCategory="org.eclipse.wb.swing.system"/>
+	<addComponent
+		id="org.jfree.chart.ChartPanel_1710520583451"
+		name="ChartPanel"
+		description="Custom component: org.jfree.chart.ChartPanel"
+		visible="true"
+		class="org.jfree.chart.ChartPanel"
+		category="custom_1710245294710"/>
+	<addCategory
+		id="custom_1715532864007"
+		name="JFreeChart"
+		description=""
+		visible="true"
+		open="true"/>
+	<visibleElement
+		id="org.eclipse.wb.swing.JGoodies"
+		visible="false"/>
+	<addComponent
+		id="org.jfree.chart.ChartPanel_1715533062516"
+		name="ChartPanel"
+		description="Custom component: org.jfree.chart.ChartPanel"
+		visible="true"
+		class="org.jfree.chart.ChartPanel"
+		category="custom_1715532864007"/>
+	<addComponent
+		id="org.jfree.chart.JFreeChart_1715533062516"
+		name="JFreeChart"
+		description="Custom component: org.jfree.chart.JFreeChart"
+		visible="true"
+		class="org.jfree.chart.JFreeChart"
+		category="custom_1715532864007"/>
+	<visibleElement
+		id="org.eclipse.wb.swing.components.awt"
+		visible="true"/>
+	<visibleElement
+		id="org.eclipse.wb.swing.components.menu"
+		visible="true"/>
+	<visibleElement
+		id="org.eclipse.wb.swing.actions"
+		visible="true"/>
+	<visibleElement
+		id="org.eclipse.wb.swing.components"
+		visible="true"/>
+	<visibleElement
+		id="org.eclipse.wb.swing.BoxLayout"
+		visible="true"/>
+	<visibleElement
+		id="org.eclipse.wb.swing.layouts"
+		visible="true"/>
+	<visibleElement
+		id="org.eclipse.wb.swing.containers"
+		visible="true"/>
+	<visibleElement
+		id="org.eclipse.wb.swing.system"
+		visible="true"/>
+	<visibleElement
+		id="custom_1710245294710"
+		visible="true"/>
+</commands>

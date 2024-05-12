@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.wb.internal.core.editor.palette.dialogs.CategoryAddDialog">
+		<item key="x" value="697"/>
+		<item key="y" value="316"/>
+		<item key="width" value="525"/>
+		<item key="height" value="399"/>
+	</section>
+	<section name="org.eclipse.wb.internal.core.editor.palette.dialogs.ImportArchiveDialog">
+		<item key="x" value="697"/>
+		<item key="y" value="295"/>
+		<item key="width" value="525"/>
+		<item key="height" value="442"/>
+	</section>
+	<section name="org.eclipse.wb.internal.core.editor.palette.dialogs.PaletteManagerDialog">
+		<item key="x" value="697"/>
+		<item key="y" value="258"/>
+		<item key="width" value="525"/>
+		<item key="height" value="516"/>
+	</section>
+	<section name="org.eclipse.wb.internal.core.editor.palette.dialogs.ComponentAddDialog">
+		<item key="x" value="646"/>
+		<item key="y" value="326"/>
+		<item key="width" value="627"/>
+		<item key="height" value="380"/>
+	</section>
+</section>

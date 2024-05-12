@@ -1,0 +1,60 @@
+package Pruebas;
+
+import java.awt.EventQueue;
+
+import javax.swing.DefaultBoundedRangeModel;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.chart.ChartPanel;
+
+public class P2 extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private JFreeChart grafico;
+	private DefaultCategoryDataset dcds;
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					P2 frame = new P2();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public P2() {
+		getContentPane().setLayout(null);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 630, 419);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		
+		ChartPanel chartPanel = new ChartPanel((JFreeChart) null);
+		contentPane.add(chartPanel);
+		
+		dcds = new DefaultCategoryDataset();
+		dcds.addValue(10, "patata", "lunes");
+		dcds.addValue(10, "patata", "lunes");
+		dcds.addValue(10, "patata", "lunes");
+		dcds.addValue(10, "patata", "lunes");
+		dcds.addValue(10, "patata", "lunes");
+		dcds.addValue(10, "patata", "lunes");
+		
+	}
+}
