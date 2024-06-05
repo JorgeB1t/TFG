@@ -2,13 +2,18 @@ package Main;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import Backend.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,24 +33,38 @@ public class Main extends JFrame {
     static String path;
     private JButton testboton;
     private static JFileChooser archivo;
+    static String url = "jdbc:mariadb://localhost:3307/tfg";
+    static String user = "root";
+    static String password = "admin";
     
-    public static void writetable() {
+    
+  
+    	
+    
+    public static void writetable(String path) {
     	try {
-			String columNames[]=defs.readExcelColumnNames("C:\\Users\\Jorge\\eclipse-workspace\\Proyecto\\Data\\ejemplo2.xlsx");
-			List<Map<String, Object>> ExcelData = defs.readExcel("C:\\Users\\Jorge\\eclipse-workspace\\Proyecto\\Data\\ejemplo2.xlsx");
-
-			  for (String columnName : columNames) {
-	                dtm.addColumn(columnName);
-	            }
-			dtm.setRowCount(0);
-			 for (Map<String, Object> rowDataMap : ExcelData) {
-	                Object[] rowData = new Object[columNames.length];
-	                for (int i = 0; i < columNames.length; i++) {
-	                    rowData[i] = rowDataMap.get(columNames[i]);
-	                }
-	                dtm.addRow(rowData);
-	            }
-	        } catch (IOException e) {
+    		String tablename = defs.getTableName(path);
+			String columNames[]=defs.readExcelColumnNames(path);
+			
+			List<Map<String, Object>> ExcelData = defs.readExcel(path);
+			Map<String, String> columntype =defs.getColumnTypes(ExcelData);
+			defs.createTable(url, user, password, tablename,columntype);
+			defs.insertDataIntoDatabase(url, user, password,tablename,columNames, ExcelData);
+			
+			
+			
+//			  for (String columnName : columNames) {
+//	                dtm.addColumn(columnName);
+//	            }
+//			dtm.setRowCount(0);
+//			 for (Map<String, Object> rowDataMap : ExcelData) {
+//	                Object[] rowData = new Object[columNames.length];
+//	                for (int i = 0; i < columNames.length; i++) {
+//	                    rowData[i] = rowDataMap.get(columNames[i]);
+//	                }
+//	                dtm.addRow(rowData);
+//	            }
+	        } catch (IOException | SQLException e) {
 	            e.printStackTrace();
 	        }
 	    } 
@@ -72,7 +91,37 @@ public class Main extends JFrame {
         setContentPane(contentPane);
         contentPane.setLayout(null); 
         
-        JTree tree = new JTree();
+        JTree tree = defs.createDatabaseTree(url, user, password,"tfg");
+        tree.addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+                if (selectedNode != null && !selectedNode.isRoot()) {
+                    String tableName = selectedNode.toString();
+                    // Aquí puedes realizar la acción deseada, por ejemplo, ejecutar una consulta SQL en la tabla seleccionada
+                   // System.out.println("Seleccionaste la tabla: " + tableName);
+                    // Llamar a un método para ejecutar una acción en función de la tabla seleccionada
+                  try {
+                	  dtm.setColumnCount(0);
+                      dtm.setRowCount(0);
+					Object[][] tableData =  defs.readTableData(url, user, password, tableName);
+					String[] tableColumns = defs.getColumnNames(url, user, password, tableName);
+					   // Add columns to the model
+		            for (String column : tableColumns) {
+		                dtm.addColumn(column);
+		            }
+
+		            // Add rows to the model
+		            for (Object[] row : tableData) {
+		                dtm.addRow(row);
+		            }
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+                }
+            }
+        });
         tree.setBounds(0, 0, 140, 696);       
         sptree = new JScrollPane(tree); // Necesita un ScrollPane
     	sptree.setBounds(0, 0, 140, 696);
@@ -141,7 +190,7 @@ public class Main extends JFrame {
         	 testboton = new JButton("test");
         	 testboton.addActionListener(new ActionListener() {
         	 	public void actionPerformed(ActionEvent e) {
-        	 		writetable();
+        	 		//writetable();
         	 	}
         	 });
         	 testboton.setBounds(177, 552, 89, 23);
@@ -173,7 +222,7 @@ public class Main extends JFrame {
               dtm.setColumnCount(0);
               dtm.setRowCount(0);
                 	 
-                	writetable();
+                	writetable(path);
                 
                 } else if (r == JFileChooser.CANCEL_OPTION) { // Si se cancela
                 JOptionPane.showMessageDialog(null, "Ha cancelado su selección");
