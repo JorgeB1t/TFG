@@ -18,8 +18,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 public class Main extends JFrame {
 
@@ -33,6 +36,8 @@ public class Main extends JFrame {
     static String path;
     private JButton testboton;
     private static JFileChooser archivo;
+    private JFreeChart grafico;
+    private DefaultCategoryDataset dcds;
     static String url = "jdbc:mariadb://localhost:3307/tfg";
     static String user = "root";
     static String password = "admin";
@@ -136,8 +141,30 @@ public class Main extends JFrame {
         tabbedPane.setBounds(0, 0, 808, 484);
         panel.add(tabbedPane);
         
-        ChartPanel chartPanel = new ChartPanel((JFreeChart) null);
-        tabbedPane.addTab("New tab", null, chartPanel, null);
+ 
+        
+        dcds = new DefaultCategoryDataset();
+        dcds.addValue(10, "patata", "lunes");
+        dcds.addValue(20, "pepino", "martes");
+        dcds.addValue(30, "patata", "miércoles");
+        dcds.addValue(40, "pepino", "jueves");
+        dcds.addValue(50, "patata", "viernes");
+        dcds.addValue(60, "pepino", "sábado");
+        dcds.addValue(70, "patata", "domingo");
+
+        // Crear el gráfico utilizando los datos del conjunto de datos
+        grafico = ChartFactory.createBarChart("Mi Gráfico", "Día", "Valor", dcds, PlotOrientation.VERTICAL, true, false, false);
+        grafico.setBackgroundPaint(Color.WHITE); // Cambia el color de fondo del gráfico a blanco
+    
+        
+        ChartPanel chartPanel = new ChartPanel(grafico);
+        chartPanel.setBackground(Color.WHITE);
+        tabbedPane.addTab("Tabla", null, chartPanel, null);
+        
+        
+
+        
+        
         
         dtm = new DefaultTableModel() {
         	private static final long serialVersionUID = 1L;
