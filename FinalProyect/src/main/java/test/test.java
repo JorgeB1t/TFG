@@ -14,7 +14,7 @@ public class test {
     static String password = "admin";
 	public static void main(String[] args) {
 	try {
-		ExcellToMariaDB.insertExcelDataIntoDatabase(filePath, url, user, password, "nombre_de_tu_tabla");
+		defs.insertExcelDataIntoDatabase(filePath, url, user, password, "nombre_de_tu_tabla");
 	} catch (IOException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();

@@ -144,13 +144,13 @@ public class Main extends JFrame {
  
         
         dcds = new DefaultCategoryDataset();
-        dcds.addValue(10, "patata", "lunes");
-        dcds.addValue(20, "pepino", "martes");
-        dcds.addValue(30, "patata", "miércoles");
-        dcds.addValue(40, "pepino", "jueves");
-        dcds.addValue(50, "patata", "viernes");
-        dcds.addValue(60, "pepino", "sábado");
-        dcds.addValue(70, "patata", "domingo");
+        dcds.addValue(10, "azul", "lunes");
+        dcds.addValue(20, "rojo", "martes");
+        dcds.addValue(30, "azul", "miércoles");
+        dcds.addValue(40, "rojo", "jueves");
+        dcds.addValue(50, "azul", "viernes");
+        dcds.addValue(60, "rojo", "sábado");
+        dcds.addValue(70, "azul", "domingo");
 
         // Crear el gráfico utilizando los datos del conjunto de datos
         grafico = ChartFactory.createBarChart("Mi Gráfico", "Día", "Valor", dcds, PlotOrientation.VERTICAL, true, false, false);

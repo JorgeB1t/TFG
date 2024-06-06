@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
 	<section name="org.eclipse.wb.internal.core.editor.palette.dialogs.CategoryAddDialog">
-		<item key="x" value="697"/>
+		<item key="x" value="-525"/>
 		<item key="y" value="316"/>
 		<item key="width" value="525"/>
 		<item key="height" value="399"/>
 	</section>
 	<section name="org.eclipse.wb.internal.core.editor.palette.dialogs.ImportArchiveDialog">
-		<item key="x" value="697"/>
-		<item key="y" value="295"/>
+		<item key="x" value="-1048"/>
+		<item key="y" value="298"/>
 		<item key="width" value="525"/>
 		<item key="height" value="442"/>
+		<list key="HISTORY_JAR_LIST">
+			<item value="C:\Users\Jorge\.m2\repository\jfree\jfreechart\1.0.13\jfreechart-1.0.13.jar"/>
+		</list>
 	</section>
 	<section name="org.eclipse.wb.internal.core.editor.palette.dialogs.PaletteManagerDialog">
-		<item key="x" value="697"/>
-		<item key="y" value="258"/>
+		<item key="x" value="-1220"/>
+		<item key="y" value="230"/>
 		<item key="width" value="525"/>
 		<item key="height" value="516"/>
 	</section>
@@ -23,5 +26,23 @@
 		<item key="y" value="326"/>
 		<item key="width" value="627"/>
 		<item key="height" value="380"/>
+	</section>
+	<section name="org.eclipse.wb.internal.core.editor.palette.dialogs.PalettePreferencesDialog">
+		<item key="x" value="-1223"/>
+		<item key="y" value="327"/>
+		<item key="width" value="525"/>
+		<item key="height" value="377"/>
+	</section>
+	<section name="org.eclipse.wb.internal.core.editor.palette.dialogs.CategoryEditDialog">
+		<item key="x" value="-1223"/>
+		<item key="y" value="330"/>
+		<item key="width" value="525"/>
+		<item key="height" value="371"/>
+	</section>
+	<section name="org.eclipse.wb.internal.core.model.util.RenameConvertSupport$RenameDialog">
+		<item key="x" value="697"/>
+		<item key="y" value="375"/>
+		<item key="width" value="525"/>
+		<item key="height" value="281"/>
 	</section>
 </section>

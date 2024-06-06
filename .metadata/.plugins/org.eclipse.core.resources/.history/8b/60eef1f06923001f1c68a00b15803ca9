@@ -1,0 +1,248 @@
+package Backend;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jfree.chart.ChartFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+public class defs {
+
+    public static void main(String[] args) {
+        String filePath = "C:/Users/Jorge/eclipse-workspace/Proyecto/Data/ejemplo.xlsx";
+        String url = "jdbc:mariadb://localhost:3307/tfg";
+        String user = "root";
+        String password = "admin";
+
+        try {
+			System.out.println(getTableName(filePath));
+			createTable(url, user, password, getTableName(filePath), getColumnTypes(readExcel(filePath)));
+		} catch (IOException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+
+
+    /**********************************************************************************************************************************/
+
+
+   
+    public static void createTable(String dbUrl, String dbUser, String dbPassword, String tableName, Map<String, String> columns) throws SQLException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (");
+        for (Map.Entry<String, String> column : columns.entrySet()) {
+            sb.append(column.getKey()).append(" ").append(column.getValue()).append(", ");
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        sb.append(")");
+
+        try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+             PreparedStatement statement = connection.prepareStatement(sb.toString())) {
+            statement.executeUpdate();
+            System.out.println("Tabla " + tableName + " creada exitosamente.");
+        } catch (SQLException e) {
+            System.err.println("Error al crear la tabla: " + e.getMessage());
+            throw e;
+        }
+    }
+    
+    /**********************************************************************************************************************************/
+    public static String getTableName(String filePath) throws IOException {
+        try (FileInputStream fis = new FileInputStream(new File(filePath));
+                Workbook wb = new XSSFWorkbook(fis)) {
+        	
+        	return wb.getSheetName(0); // Obtener el nombre de la primera hoja (índice 0)
+        } catch (FileNotFoundException e) {
+            // Si el archivo no se encuentra, lanzar la excepción para que se maneje en otro lugar
+            throw new FileNotFoundException("Archivo no encontrado: " + e.getMessage());
+        } catch (IOException e) {
+            // Si hay un error de E/S, lanzar la excepción para que se maneje en otro lugar
+            throw new IOException("Error de E/S: " + e.getMessage());
+        }
+    }
+
+    /**********************************************************************************************************************************/
+
+    private static Class<?> getColumnType(List<Object[]> data, int columnIndex) {
+        for (Object[] rowData : data) {
+            Object value = rowData[columnIndex];
+            if (value != null) {
+                return value.getClass();
+            }
+        }
+        return null;
+    
+    }
+
+    /**********************************************************************************************************************************/
+ 
+    
+    public static void insertExcelDataIntoDatabase(String filePath, String dbUrl, String dbUser, String dbPassword, String tableName) throws IOException, SQLException {
+        // Leer los nombres de las columnas del archivo Excel
+        String[] columnNames = readExcelColumnNames(filePath);
+        List<Map<String, Object>> excelData = readExcel(filePath);
+        Map<String, String> columns = getColumnTypes(excelData);
+        // Crear la tabla en la base de datos
+        //createTable(dbUrl, dbUser, dbPassword, tableName, columns);
+        // Leer los datos del archivo Excel
+//        List<Object[]> data = readExcelData(filePath);
+        // Insertar los datos en la base de datos
+        //insertDataIntoDatabase(dbUrl, dbUser, dbPassword, tableName, columnNames, data);
+//        for (int i = 0; i < data.size(); i++) {
+//			System.out.println(data);
+//		}
+
+    }
+
+    /**********************************************************************************************************************************/
+
+    public static  String[] readExcelColumnNames(String filePath) throws IOException {
+        try (FileInputStream fis = new FileInputStream(new File(filePath));
+             Workbook workbook = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = workbook.getSheetAt(0); // Obtener la primera hoja del libro
+            Row firstRow = sheet.getRow(0); // Obtener la primera fila (cabecera)
+
+            // Crear un array para los nombres de las columnas
+            String[] columnNames = new String[firstRow.getPhysicalNumberOfCells()];
+            int i = 0;
+            // Recorrer las celdas de la primera fila para obtener los nombres de las columnas
+            for (Cell cell : firstRow) {
+                columnNames[i++] = cell.getStringCellValue();
+                
+            }
+
+            return columnNames; // Devolver los nombres de las columnas
+        }
+    }
+    
+    /**********************************************************************************************************************************/
+
+    
+    public static List<Map<String, Object>> readExcel(String filePath) throws IOException {
+        List<Map<String, Object>> data = new ArrayList<>();
+        try (FileInputStream fis = new FileInputStream(filePath);
+             Workbook workbook = new XSSFWorkbook(fis)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Row headerRow = sheet.getRow(0);
+            int numColumns = headerRow.getPhysicalNumberOfCells();
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) continue; // Saltar la fila de encabezado
+                Map<String, Object> rowData = new HashMap<>();
+                for (int i = 0; i < numColumns; i++) {
+                    Cell cell = row.getCell(i);
+                    rowData.put(headerRow.getCell(i).getStringCellValue(), getCellValue(cell));
+                }
+                data.add(rowData);
+            }
+        }
+        return data;
+    }
+    
+    /**********************************************************************************************************************************/
+
+    
+    
+    private static Object getCellValue(Cell cell) {
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getDateCellValue();
+                } else {
+                    return cell.getNumericCellValue();
+                }
+            case BOOLEAN:
+                return cell.getBooleanCellValue();
+            case FORMULA:
+                return cell.getCellFormula();
+            default:
+                return null;
+        }
+    }
+
+    /**********************************************************************************************************************************/
+    
+    private static Map<String, String> getColumnTypes(List<Map<String, Object>> data) {
+        Map<String, String> columnTypes = new LinkedHashMap<>();
+        if (data.isEmpty()) return columnTypes;
+        Map<String, Object> firstRow = data.get(0);
+        for (Map.Entry<String, Object> entry : firstRow.entrySet()) {
+            String columnName = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof String) {
+                columnTypes.put(columnName, "VARCHAR(255)");
+            } else if (value instanceof Integer) {
+                columnTypes.put(columnName, "INT");
+            } else if (value instanceof Double) {
+                columnTypes.put(columnName, "DOUBLE PRECISION");
+            } else if (value instanceof Date) {
+                columnTypes.put(columnName, "DATE");
+            } else if (value instanceof Boolean) {
+                columnTypes.put(columnName, "BOOLEAN");
+            } else {
+                columnTypes.put(columnName, "VARCHAR(255)");
+            }
+        }
+        return columnTypes;
+    }
+
+    /**********************************************************************************************************************************/
+
+
+
+
+    	
+    public static void insertDataIntoDatabase(String url, String user, String password, String tableName, String[] columnNames, List<Object[]> data) throws SQLException {
+        // Unir los nombres de las columnas con una coma y un espacio
+        String columns = String.join(", ", columnNames);
+        // Crear una cadena de placeholders "?" separados por comas
+        String placeholders = String.join(", ", Collections.nCopies(columnNames.length, "?"));
+        // Crear la sentencia SQL de inserción
+        String sql = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + placeholders + ")";
+
+        try (Connection connection = DriverManager.getConnection(url, user, password);
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            // Recorrer los datos y configurar los parámetros de la sentencia SQL
+            for (Object[] rowData : data) {
+                for (int i = 0; i < rowData.length; i++) {
+                    // Registrar el tipo de dato del valor actual
+                    System.out.println("Tipo de dato de la columna " + columnNames[i] + ": " + rowData[i].getClass().getName());
+                 //   statement.setObject(i + 1, rowData[i]);
+                }
+                statement.addBatch(); // Añadir la sentencia a un lote
+            }
+
+            statement.executeBatch(); // Ejecutar el lote de sentencias
+        } catch (SQLException e) {
+            // Manejar las excepciones de SQL y registrar el error
+        	System.out.println("no work");
+            e.printStackTrace();
+            throw e; // Re-lanzar la excepción para ser manejada por el llamador
+        }
+    
+        
+        
+    }
+    private static ChartFactory showChart(){
+		return null;
+    	
+    }
+}
+
