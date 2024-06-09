@@ -51,12 +51,6 @@ public class Main extends JFrame {
     		String tablename = defs.getTableName(path);
 			String columNames[]=defs.readExcelColumnNames(path);
 			
-			System.out.println(tablename);
-			for (String string : columNames) {
-				System.out.println(string);
-			}
-			
-			
 			List<Map<String, Object>> ExcelData = defs.readExcel(path);
 			Map<String, String> columntype =defs.getColumnTypes(ExcelData);
 			defs.createTable(url, user, password, tablename,columntype);
@@ -223,7 +217,7 @@ public class Main extends JFrame {
         	 testboton = new JButton("test");
         	 testboton.addActionListener(new ActionListener() {
         	 	public void actionPerformed(ActionEvent e) {
-        	 		writetable("C:\\Users\\Jorge\\eclipse-workspace\\Proyecto\\Data\\ejemplo2.1.xlsx");
+        	 		//writetable();
         	 	}
         	 });
         	 testboton.setBounds(177, 552, 89, 23);
