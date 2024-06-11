@@ -1,0 +1,44 @@
+package test;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+
+public class Main {
+    public static void main(String[] args) {
+        try {
+            // Parámetros a enviar
+            String nombre = "Juan";
+            int edad = 30;
+            String ciudad = "Ciudad de México";
+
+            // Codificar los parámetros para incluirlos en la URL
+            String nombreEncoded = URLEncoder.encode(nombre, "UTF-8");
+            String ciudadEncoded = URLEncoder.encode(ciudad, "UTF-8");
+
+            // Construir la URL de la API de Python con FastAPI con parámetros
+            String apiUrl = "http://localhost:8000/saludo?nombre=" + nombreEncoded + "&edad=" + edad + "&ciudad=" + ciudadEncoded;
+            URL url = new URL(apiUrl);
+
+            // Abrir conexión HTTP
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+
+            // Leer la respuesta
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            // Imprimir la respuesta
+            System.out.println("Respuesta de la API de Python con FastAPI:");
+            System.out.println(response.toString());
+        } catch (Exception e) {
+            System.err.println("Error al llamar a la API de Python con FastAPI: " + e.getMessage());
+        }
+    }
+}

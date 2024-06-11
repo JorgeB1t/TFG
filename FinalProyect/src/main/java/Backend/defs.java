@@ -2,11 +2,23 @@ package Backend;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
 
+import com.google.gson.Gson;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Date;
@@ -15,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,7 +35,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JFrame;
 import javax.swing.JTree;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public class defs {
@@ -34,7 +49,16 @@ public class defs {
         String password = "admin";
 
     
-       
+   	 try {
+		String columNames[]=defs.getColumnNames(url, user, password,"dinerinchis");
+		for (int i = 0; i < columNames.length; i++) {
+			System.out.println(columNames[i]);
+		}
+	} catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+
 //        try {
 //			//getColumnTypes(url, user, password, getTableName(filePath));
 //            String tableName = getTableName(filePath);
@@ -44,10 +68,13 @@ public class defs {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
+        
+     
+        
+        
 			try {
 
 	            // Leer los nombres de las columnas y los datos del archivo Excel
-	            String[] columnNames = readExcelColumnNames(filePath);
 	            List<Map<String, Object>> excelData = readExcel(filePath);
 
 	            // Convertir los datos a una lista de arrays de objetos
@@ -71,18 +98,29 @@ public class defs {
 	        }
 	    }
         
-//        try {
-//            // Llamar al método para leer los datos de la tabla
-//            Object[][] tabla =  readTableData(url, user, password,  getTableName(filePath));
-//            for (int i = 0; i < tabla.length; i++) {
-//                for (int j = 0; j < tabla[i].length; j++) {
-//                    System.out.println(tabla[i][j]);
-//                }
-//            }
-//        } catch (SQLException | IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    
+				public static void createAndShowChart() {
+					 DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+				
+				     try {
+				         Connection conn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/nombre_de_tu_base_de_datos", "usuario", "contraseña");
+				         String query = "SELECT fecha, monto FROM ventas";
+				         PreparedStatement statement = conn.prepareStatement(query);
+				         ResultSet resultSet = statement.executeQuery();
+				
+				         while (resultSet.next()) {
+				             String fecha = resultSet.getString("fecha");
+				             double monto = resultSet.getDouble("monto");
+				             dataset.addValue(monto, "Ventas", fecha);
+				         }
+				
+				         conn.close();
+				     } catch (SQLException e) {
+				         e.printStackTrace();
+				     }
+}
+    
+
 
     /**********************************************************************************************************************************/
 
@@ -271,10 +309,9 @@ public class defs {
     	    }
         
     }
-    private static ChartFactory showChart(){
-		return null;
+
     	
-    }
+    
     public static JTree createDatabaseTree(String url, String user, String password, String databaseName) {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("Tablas");
         try (Connection connection = DriverManager.getConnection(url, user, password)) {
@@ -294,6 +331,9 @@ public class defs {
 
         return new JTree(root);
     }
+    
+    
+    
     
     
     public static Object[][] readTableData(String url, String user, String password, String tableName) throws SQLException {
@@ -346,7 +386,175 @@ public class defs {
                     }
                     return columnNames;
                 }
+                
+                
             }
+            
+        }
+    
+    }
+    public static Object[][] getSpecificColumns(DefaultTableModel model, String[] columnNames) {
+        int rowCount = model.getRowCount();
+        int columnCount = columnNames.length;
+
+        Object[][] specificColumns = new Object[columnCount][rowCount];
+
+        for (int i = 0; i < columnCount; i++) {
+            String columnName = columnNames[i];
+            int columnIndex = model.findColumn(columnName);
+            if (columnIndex != -1) {
+                for (int j = 0; j < rowCount; j++) {
+                    specificColumns[i][j] = model.getValueAt(j, columnIndex);
+                }
+            } else {
+                System.out.println("No se encontró la columna '" + columnName + "'.");
+            }
+        }
+
+        return specificColumns;
+    }
+    
+    public static String sendPostRequest(String tablename, String dfcolumn, List<String> columndrop, List<String> dummies, Map<String, Object> newdata) throws Exception {
+        // Verificar que las cadenas lleguen correctamente
+
+        
+        // URL de la API FastAPI
+        String apiUrl = "http://localhost:8000/api/echo";
+
+        URL url = new URL(apiUrl);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+        // Configurar el encabezado y el método de solicitud
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+
+        // Convertir las listas a nuevas instancias de ArrayList para evitar problemas con el tipo de lista
+        List<String> newcolumndrop = new ArrayList<>(columndrop);
+        List<String> newdummies = new ArrayList<>(dummies);
+
+        // Datos que enviarás a la API
+        Map<String, Object> postData = new HashMap<>();
+        postData.put("textData1", tablename);
+        postData.put("textData2", dfcolumn);
+        postData.put("listData1", newcolumndrop);
+        postData.put("listData2", newdummies);
+        postData.put("mapData", newdata);
+
+        // Convertir el objeto a formato JSON
+        Gson gson = new Gson();
+        String jsonData = gson.toJson(postData);
+
+        // Enviar datos a la API
+        con.setDoOutput(true);
+        try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+            wr.write(jsonData.getBytes(StandardCharsets.UTF_8));
+            wr.flush();
+        }
+
+        // Leer la respuesta de la API
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            System.out.println(response.toString());
+            return response.toString();
+        }
+		
+    }
+    
+    private static void closeResources(Connection connection, PreparedStatement preparedStatement, ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar el ResultSet: " + e.getMessage());
+            }
+        }
+        if (preparedStatement != null) {
+            try {
+                preparedStatement.close();
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar la declaración: " + e.getMessage());
+            }
+        }
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar la conexión: " + e.getMessage());
+            }
+        }
+    }
+    
+    public static void dropTable(String url, String user, String password, String tableName) throws SQLException {
+        // Verificar que los parámetros no sean nulos ni vacíos
+        if (url == null || url.isEmpty() || 
+            user == null || user.isEmpty() || 
+            password == null || password.isEmpty() || 
+            tableName == null || tableName.isEmpty()) {
+            throw new IllegalArgumentException("La URL de la base de datos, el usuario, la contraseña y el nombre de la tabla son requeridos.");
+        }
+
+        // Conectar a la base de datos
+        try (Connection connection = DriverManager.getConnection(url, user, password)) {
+            // Crear la declaración SQL para eliminar la tabla
+            String sql = "DROP TABLE " + tableName;
+
+            // Crear un Statement y ejecutar la declaración SQL
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate(sql);
+                System.out.println("Tabla " + tableName + " eliminada exitosamente.");
+            }
+        } catch (SQLException e) {
+            // Manejar errores de SQL
+            System.err.println("Error al eliminar la tabla: " + e.getMessage());
+            throw e;
+        }
+    }
+    
+    
+    private static Connection getConnection() throws SQLException {
+    	String url = "jdbc:mariadb://localhost:3307/tfg";
+    	String user = "root";
+    	String password = "admin";
+        return DriverManager.getConnection(url, user, password);
+    }
+
+    // Método para determinar si los datos en una columna especificada son numéricos
+    public static boolean isColumnNumeric(String tableName, String columnName) {
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement()) {
+
+            String query = "SELECT " + columnName + " FROM " + tableName + " LIMIT 1";
+            ResultSet resultSet = statement.executeQuery(query);
+
+            if (resultSet.next()) {
+                Object value = resultSet.getObject(columnName);
+                return isNumeric(value); // Devuelve true si el valor es numérico, de lo contrario false
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false; // En caso de error o si no hay resultados, devuelve false
+    }
+
+    // Método para verificar si un valor es numérico
+    private static boolean isNumeric(Object value) {
+        if (value == null) {
+            return false;
+        }
+        if (value instanceof Number) {
+            return true;
+        }
+        try {
+            Double.parseDouble(value.toString());
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 

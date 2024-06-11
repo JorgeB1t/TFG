@@ -1,0 +1,61 @@
+package Pruebas;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public class APIClient {
+
+    private static final String API_URL = "http://localhost:8000/datos";
+
+    public static void sendDataToAPI(String tablename, String dfcolumn, List<String> columndrop, List<String> dummies, Map<String, Object> newdata) throws IOException {
+        Gson gson = new GsonBuilder().create();
+        String newdataJson = gson.toJson(newdata);
+
+        URL url = new URL(API_URL);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
+
+        String query = String.format("tablename=%s&dfcolumn=%s&columndrop=%s&dummies=%s",
+                tablename, dfcolumn, String.join(",", columndrop), String.join(",", dummies));
+
+        try (OutputStream outputStream = connection.getOutputStream()) {
+            byte[] input = query.getBytes("utf-8");
+            outputStream.write(input, 0, input.length);
+        }
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            System.out.println("Los datos se enviaron correctamente a la API.");
+        } else {
+            System.out.println("Error al enviar los datos a la API. Código de respuesta: " + responseCode);
+        }
+    }
+
+    public static void main(String[] args) {
+        String tablename = "salario";
+        String dfcolumn = "Salarios";
+        List<String> columndrop = List.of("Nombre", "Salario");
+        List<String> dummies = List.of("Género", "Departamento");
+        Map<String, Object> newdata = Map.of(
+            "Nombre", "Nuevo",
+            "Edad", 36,
+            "Género", "Femenino",
+            "Departamento", "Finanzas"
+        );
+
+        try {
+            sendDataToAPI(tablename, dfcolumn, columndrop, dummies, newdata);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+

@@ -1,0 +1,66 @@
+package test;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class MariaDBReader {
+
+    // Método para obtener la conexión a la base de datos MariaDB
+    private static Connection getConnection() throws SQLException {
+    	String url = "jdbc:mariadb://localhost:3307/tfg";
+    	String user = "root";
+    	String password = "admin";
+        return DriverManager.getConnection(url, user, password);
+    }
+
+    // Método para determinar si los datos en todas las columnas especificadas son numéricos
+    public static boolean areAllColumnsNumeric(String tableName, String[] columnNames) {
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement()) {
+
+            String query = "SELECT " + String.join(", ", columnNames) + " FROM " + tableName + " LIMIT 1";
+            ResultSet resultSet = statement.executeQuery(query);
+
+            if (resultSet.next()) {
+                for (String columnName : columnNames) {
+                    Object value = resultSet.getObject(columnName);
+                    if (!isNumeric(value)) {
+                        return false; // Si alguna columna no es numérica, devuelve false
+                    }
+                }
+                return true; // Todas las columnas son numéricas
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false; // En caso de error o si no hay resultados, devuelve false
+    }
+
+    // Método para verificar si un valor es numérico
+    private static boolean isNumeric(Object value) {
+        if (value == null) {
+            return false;
+        }
+        if (value instanceof Number) {
+            return true;
+        }
+        try {
+            Double.parseDouble(value.toString());
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static void main(String[] args) {
+        String tableName = "your_table_name";
+        String[] columns = {"column1", "column2", "column3"};
+
+        boolean allNumeric = areAllColumnsNumeric(tableName, columns);
+        System.out.println("All specified columns are numeric: " + allNumeric);
+    }
+}

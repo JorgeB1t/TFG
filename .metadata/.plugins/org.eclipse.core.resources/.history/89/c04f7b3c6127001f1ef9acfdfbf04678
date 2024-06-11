@@ -1,0 +1,70 @@
+package Pruebas;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public class APIClient {
+
+    private static final String API_URL = "http://localhost:8000/datos";
+
+    public static void sendDataToAPI(String tablename, String dfcolumn, List<String> columndrop, List<String> dummies, Map<String, Object> newdata) throws IOException {
+        // Construir el objeto JSON
+        Gson gson = new GsonBuilder().create();
+        String jsonInputString = gson.toJson(Map.of(
+            "tablename", tablename,
+            "dfcolumn", dfcolumn,
+            "columndrop", columndrop,
+            "dummies", dummies,
+            "newdata", newdata
+        ));
+
+        // Crear la conexión HTTP
+        URL url = new URL(API_URL);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
+
+        // Escribir los datos JSON en el cuerpo de la solicitud
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = jsonInputString.getBytes("utf-8");
+            os.write(input, 0, input.length);
+        }
+
+        // Leer la respuesta (opcional)
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            System.out.println("Los datos se enviaron correctamente a la API.");
+        } else {
+            // Imprimir detalles sobre el error
+            System.out.println("Error al enviar los datos a la API. Código de respuesta: " + responseCode);
+            System.out.println("Mensaje de error: " + connection.getResponseMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        String tablename = "salario";
+        String dfcolumn = "Salarios";
+        List<String> columndrop = List.of("Nombre", "Salario");
+        List<String> dummies = List.of("Género", "Departamento");
+        Map<String, Object> newdata = Map.of(
+            "Nombre", "Nuevo",
+            "Edad", 36,
+            "Género", "Femenino",
+            "Departamento", "Finanzas"
+        );
+
+        try {
+            sendDataToAPI(tablename, dfcolumn, columndrop, dummies, newdata);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+

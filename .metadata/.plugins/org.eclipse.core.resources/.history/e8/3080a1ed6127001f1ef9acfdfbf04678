@@ -1,0 +1,76 @@
+package Pruebas;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+public class APIClient {
+
+    private static final String API_URL = "http://localhost:8000/datos";
+
+    public static void sendDataToAPI(String tablename, String dfcolumn, List<String> columndrop, List<String> dummies, Map<String, Object> newdata) throws IOException {
+        // Construir la URL con parámetros de consulta
+        StringBuilder urlStringBuilder = new StringBuilder(API_URL);
+        urlStringBuilder.append("?tablename=").append(tablename);
+        urlStringBuilder.append("&dfcolumn=").append(dfcolumn);
+        for (String column : columndrop) {
+            urlStringBuilder.append("&columndrop=").append(column);
+        }
+        for (String dummy : dummies) {
+            urlStringBuilder.append("&dummies=").append(dummy);
+        }
+
+        // Convertir los nuevos datos a una cadena de consulta JSON
+        StringBuilder newdataBuilder = new StringBuilder();
+        for (Map.Entry<String, Object> entry : newdata.entrySet()) {
+            newdataBuilder.append("&").append(entry.getKey()).append("=").append(entry.getValue());
+        }
+
+        // Añadir los nuevos datos a la URL
+        urlStringBuilder.append(newdataBuilder);
+
+        // Crear la conexión HTTP
+        URL url = new URL(urlStringBuilder.toString());
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        // Leer la respuesta
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            Scanner scanner = new Scanner(connection.getInputStream());
+            StringBuilder response = new StringBuilder();
+            while (scanner.hasNextLine()) {
+                response.append(scanner.nextLine());
+            }
+            scanner.close();
+            System.out.println("Los datos se enviaron correctamente a la API. Respuesta: " + response.toString());
+        } else {
+            System.out.println("Error al enviar los datos a la API. Código de respuesta: " + responseCode);
+        }
+    }
+
+    public static void main(String[] args) {
+        // Define los datos a enviar
+        String tablename = "salario";
+        String dfcolumn = "Salarios";
+        List<String> columndrop = List.of("Nombre", "Salario");
+        List<String> dummies = List.of("Género", "Departamento");
+        Map<String, Object> newdata = Map.of(
+                "Nombre", "Nuevo",
+                "Edad", 36,
+                "Género", "Femenino",
+                "Departamento", "Finanzas"
+        );
+
+        try {
+            // Envía los datos a la API
+            sendDataToAPI(tablename, dfcolumn, columndrop, dummies, newdata);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+

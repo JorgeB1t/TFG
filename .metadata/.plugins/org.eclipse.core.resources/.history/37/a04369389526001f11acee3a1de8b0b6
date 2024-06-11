@@ -1,0 +1,107 @@
+package test;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Iterator;
+
+import javax.swing.JFrame;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
+public class Test2 {
+
+    static String url = "jdbc:mariadb://localhost:3307/tfg";
+    static String user = "root";
+    static String password = "admin";
+    private static DefaultCategoryDataset dcds;
+    static DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+    public static void main(String[] args) {
+       obtenerDatos();
+        
+     
+    }
+
+    public static void obtenerDatos() {
+        Object[][] datos = null;
+
+        try {
+            Connection conn = DriverManager.getConnection(url, user, password);
+            String query = "SELECT * FROM dinerinchis";
+            PreparedStatement statement = conn.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+
+            // Obtener la cantidad de filas
+            resultSet.last();
+            int numRows = resultSet.getRow();
+            resultSet.beforeFirst();
+
+            // Inicializar la matriz con la cantidad de filas obtenidas
+            datos = new Object[numRows][5]; // Ahora la matriz tiene 5 columnas
+
+            // Recorrer los resultados y almacenar en la matriz
+            int fila = 0;
+            while (resultSet.next()) {
+                String nombre = resultSet.getString("Nombre");
+                double edad = resultSet.getDouble("Edad");
+                double salario = resultSet.getDouble("Salario");
+                String genero = resultSet.getString("Género");
+                String departamento = resultSet.getString("Departamento");
+
+                // Almacenar los datos en la matriz
+                datos[fila][0] = nombre; // Nombre
+                datos[fila][1] = edad; // Edad
+                datos[fila][2] = salario; // Salario
+                datos[fila][3] = genero; // Género
+                datos[fila][4] = departamento; // Departamento
+
+                fila++;
+                dataset.addValue(edad, "Edad", nombre);
+                dataset.addValue(salario, "Salario", nombre);
+            }
+
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < datos.length; i++) {
+			
+		}
+        
+
+
+        // Crear gráfico de dispersión
+        JFreeChart chart = ChartFactory.createBarChart(
+                "Relación entre Edad y Salario", // Título del gráfico
+                "Edad", // Etiqueta del eje x
+                "Salario", // Etiqueta del eje y
+                dcds, // Datos
+                PlotOrientation.VERTICAL,
+                true, // Mostrar leyenda
+                true, // Usar tooltips
+                false // No usar URLs
+        );
+
+        // Crear y mostrar ventana con el gráfico
+        ChartPanel chartPanel = new ChartPanel(chart);
+        JFrame frame = new JFrame("Gráfico de Dispersión");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(chartPanel);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    
+    
+    
+}
+

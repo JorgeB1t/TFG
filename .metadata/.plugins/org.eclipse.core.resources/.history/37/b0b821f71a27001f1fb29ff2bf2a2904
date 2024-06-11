@@ -1,0 +1,32 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+public class Test2 {
+    public static void main(String[] args) {
+        try {
+            // URL de la API de Python con FastAPI
+            URL url = new URL("http://localhost:8000/saludo");
+
+            // Abrir conexión HTTP
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+
+            // Leer la respuesta
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            // Imprimir la respuesta
+            System.out.println("Respuesta de la API de Python con FastAPI:");
+            System.out.println(response.toString());
+        } catch (Exception e) {
+            System.err.println("Error al llamar a la API de Python con FastAPI: " + e.getMessage());
+        }
+    }
+}

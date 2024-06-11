@@ -1,0 +1,54 @@
+package test;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import com.google.gson.Gson;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        String url = "http://localhost:8000/api/echo"; // URL de la API FastAPI sin parámetro en la URL
+
+        URL obj = new URL(url);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+        // Configurar el encabezado y el método de solicitud
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+
+        // Datos que enviarás a la API (cadena de texto y diccionario)
+        String textData = "Hello, FastAPI!";
+        Map<String, String> mapData = new HashMap<>();
+        mapData.put("key1", "value1");
+        mapData.put("key2", "value2");
+
+        Map<String, Object> postData = new HashMap<>();
+        postData.put("textData", textData);
+        postData.put("mapData", mapData);
+
+        Gson gson = new Gson();
+        String jsonData = gson.toJson(postData);
+
+        // Enviar datos a la API
+        con.setDoOutput(true);
+        try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+            wr.write(jsonData.getBytes(StandardCharsets.UTF_8));
+            wr.flush();
+        }
+
+        // Leer la respuesta de la API
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            System.out.println(response.toString());
+        }
+    }
+}
+

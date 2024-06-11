@@ -1,0 +1,71 @@
+package Pruebas;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public class APIClient {
+
+    private static final String API_URL = "http://localhost:8000/datos";
+
+    public static void sendDataToAPI(String tablename, String dfcolumn, List<String> columndrop, List<String> dummies, Map<String, Object> newdata) throws IOException {
+        // Construir la URL con parámetros de consulta
+        StringBuilder urlStringBuilder = new StringBuilder(API_URL);
+        urlStringBuilder.append("?tablename=").append(tablename);
+        urlStringBuilder.append("&dfcolumn=").append(dfcolumn);
+        for (String column : columndrop) {
+            urlStringBuilder.append("&columndrop=").append(column);
+        }
+        for (String dummy : dummies) {
+            urlStringBuilder.append("&dummies=").append(dummy);
+        }
+        Gson gson = new GsonBuilder().create();
+        String newdataJson = gson.toJson(newdata);
+        urlStringBuilder.append("&newdata=").append(newdataJson);
+
+        URL url = new URL(urlStringBuilder.toString());
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        // Leer la respuesta (opcional)
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            InputStream inputStream = connection.getInputStream();
+            String response = new Scanner(inputStream, "UTF-8").useDelimiter("\\A").next();
+            System.out.println("Los datos se enviaron correctamente a la API. Respuesta: " + response);
+        } else {
+            System.out.println("Error al enviar los datos a la API. Código de respuesta: " + responseCode);
+            InputStream errorStream = connection.getErrorStream();
+            if (errorStream != null) {
+                String errorMessage = new Scanner(errorStream, "UTF-8").useDelimiter("\\A").next();
+                System.out.println("Mensaje de error: " + errorMessage);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        String tablename = "salario";
+        String dfcolumn = "Salarios";
+        List<String> columndrop = List.of("Nombre", "Salario");
+        List<String> dummies = List.of("Género", "Departamento");
+        Map<String, Object> newdata = Map.of(
+            "Nombre", "Nuevo",
+            "Edad", 36,
+            "Género", "Femenino",
+            "Departamento", "Finanzas"
+        );
+
+        try {
+            sendDataToAPI(tablename, dfcolumn, columndrop, dummies, newdata);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

@@ -1,0 +1,75 @@
+package test;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class test2 {
+
+    static String url = "jdbc:mariadb://localhost:3307/tfg";
+    static String user = "root";
+    static String password = "admin";
+
+    public static void main(String[] args) {
+        Object[][] datos = obtenerDatos();
+        
+        // Imprimir los datos recuperados
+        for (Object[] fila : datos) {
+            for (Object dato : fila) {
+                System.out.print(dato + "\t");
+            }
+            System.out.println();
+        }
+    }
+
+    public static Object[][] obtenerDatos() {
+        Object[][] datos = null;
+
+        try {
+            Connection conn = DriverManager.getConnection(url, user, password);
+            String query = "SELECT * FROM dinerinchis";
+            PreparedStatement statement = conn.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+
+            // Obtener la cantidad de filas
+            resultSet.last();
+            int numRows = resultSet.getRow();
+            resultSet.beforeFirst();
+
+            // Inicializar la matriz con la cantidad de filas obtenidas
+            datos = new Object[numRows][2];
+
+            // Recorrer los resultados y almacenar en la matriz
+            int fila = 0;
+            while (resultSet.next()) {
+                String nombre = resultSet.getString("Nombre");
+                double edad = resultSet.getDouble("Edad");
+                double salario = resultSet.getDouble("Salario");
+                String genero = resultSet.getString("Genero");
+                String departamento = resultSet.getString("Departamento");
+
+                
+
+
+
+                // Almacenar los datos en la matriz
+                datos[fila][0] = edad;
+                datos[fila][1] = salario;
+                datos[fila][2] = nombre;
+                datos[fila][3] = genero;
+                datos[fila][4] = departamento;
+
+
+                fila++;
+            }
+
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return datos;
+    }
+}

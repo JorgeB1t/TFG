@@ -1,0 +1,65 @@
+package Pruebas;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
+
+public class APIClient {
+    
+    public static void sendDataToAPI(String tablename, String dfcolumn, List<String> columndrop, List<String> dummies, Map<String, Object> newdata) throws IOException {
+        // Construir la URL con los parámetros
+        StringBuilder urlBuilder = new StringBuilder("http://localhost:8000/datos?");
+        urlBuilder.append("tablename=").append(URLEncoder.encode(tablename, "UTF-8"));
+        urlBuilder.append("&dfcolumn=").append(URLEncoder.encode(dfcolumn, "UTF-8"));
+        for (String column : columndrop) {
+            urlBuilder.append("&columndrop=").append(URLEncoder.encode(column, "UTF-8"));
+        }
+        for (String dummy : dummies) {
+            urlBuilder.append("&dummies=").append(URLEncoder.encode(dummy, "UTF-8"));
+        }
+        for (Map.Entry<String, Object> entry : newdata.entrySet()) {
+            urlBuilder.append("&").append(URLEncoder.encode(entry.getKey(), "UTF-8")).append("=").append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
+        }
+
+        // Imprimir la URL para depuración
+        System.out.println("URL de la solicitud: " + urlBuilder.toString());
+
+        // Crear la conexión HTTP
+        URL url = new URL(urlBuilder.toString());
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        // Leer la respuesta (opcional)
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            System.out.println("Los datos se enviaron correctamente a la API.");
+        } else {
+            // Imprimir detalles sobre el error
+            System.out.println("Error al enviar los datos a la API. Código de respuesta: " + responseCode);
+            System.out.println("Mensaje de error: " + connection.getResponseMessage());
+        }
+    }
+
+    public static void main(String[] args) {
+        String tablename = "salario";
+        String dfcolumn = "Salarios";
+        List<String> columndrop = List.of("Nombre", "Salario");
+        List<String> dummies = List.of("Género", "Departamento");
+        Map<String, Object> newdata = Map.of(
+            "Nombre", "Nuevo",
+            "Edad", 36,
+            "Género", "Femenino",
+            "Departamento", "Finanzas"
+        );
+
+        try {
+            sendDataToAPI(tablename, dfcolumn, columndrop, dummies, newdata);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+

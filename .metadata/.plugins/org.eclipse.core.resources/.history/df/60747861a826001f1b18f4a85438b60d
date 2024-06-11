@@ -1,0 +1,57 @@
+package test;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import javax.swing.*;
+
+public class Test2 {
+
+    public static void main(String[] args) {
+        // Crear un array bidimensional
+        double[][] data = {
+            {1.0, 2.0, 3.0},
+            {4.0, 5.0, 6.0},
+            {7.0, 8.0, 9.0}
+        };
+
+        // Llamar al método para crear el gráfico
+        createChart(data);
+    }
+
+    public static void createChart(double[][] data) {
+        // Crear el dataset
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        // Añadir los datos al dataset
+        for (int row = 0; row < data.length; row++) {
+            for (int col = 0; col < data[row].length; col++) {
+                dataset.addValue(data[row][col], "Row " + row, "Column " + col);
+            }
+        }
+
+        // Crear el gráfico
+        JFreeChart barChart = ChartFactory.createBarChart(
+            "Array Bidimensional", // Título del gráfico
+            "Categoría",           // Etiqueta del eje X
+            "Valor",               // Etiqueta del eje Y
+            dataset,               // Datos
+            PlotOrientation.VERTICAL,
+            true,                  // Incluir leyenda
+            true,
+            false
+        );
+
+        // Crear el panel del gráfico
+        ChartPanel chartPanel = new ChartPanel(barChart);
+        chartPanel.setPreferredSize(new java.awt.Dimension(800, 600));
+
+        // Crear el frame para mostrar el gráfico
+        JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(chartPanel);
+        frame.pack();
+        frame.setVisible(true);
+    }
+}

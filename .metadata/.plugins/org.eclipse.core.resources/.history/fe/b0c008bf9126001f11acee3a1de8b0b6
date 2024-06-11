@@ -1,0 +1,72 @@
+package test;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import javax.swing.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class Test {
+
+    static String url = "jdbc:mariadb://localhost:3307/tfg";
+    static String user = "root";
+    static String password = "admin";
+
+    public static void main(String[] args) {
+        createAndShowChart();
+    }
+
+    public static void createAndShowChart() {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        try {
+            Connection conn = DriverManager.getConnection(url, user, password);
+            String query = "SELECT * FROM dinerinchis";
+            PreparedStatement statement = conn.prepareStatement(query);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                String nombre = resultSet.getString("Nombre");
+                int edad = resultSet.getInt("Edad");
+                double salario = resultSet.getDouble("Salario");
+
+                
+//                dcds = new DefaultCategoryDataset();
+//                dcds.addValue(10, "patata", "lunes");
+//                dcds.addValue(20, "patata", "martes");
+//                dcds.addValue(30, "patata", "miércoles");
+//                dcds.addValue(40, "patata", "jueves");
+//                dcds.addValue(50, "patata", "viernes");
+//                dcds.addValue(60, "patata", "sábado");
+//                dcds.addValue(70, "patata", "domingo");
+                
+                
+                // Agregar valores al dataset
+                dataset.addValue(edad, "Edad", nombre);
+                dataset.addValue(salario, "Salario", nombre);
+            }
+
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Crear gráfico de barras
+     // Crear gráfico de barras
+        JFreeChart chart = ChartFactory.createBarChart("Edad y Salario por Empleado", "Empleado", "Valor", dataset, PlotOrientation.VERTICAL, true, true, false);
+        ChartPanel chartPanel = new ChartPanel(chart);
+
+        // Crear y mostrar ventana
+        JFrame frame = new JFrame("Gráfico de Ventas");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(chartPanel);
+        frame.pack();
+        frame.setVisible(true);
+    }
+}

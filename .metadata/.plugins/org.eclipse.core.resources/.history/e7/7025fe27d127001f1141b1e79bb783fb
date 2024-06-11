@@ -1,0 +1,59 @@
+package Pruebas;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Map;
+
+public class ApiClient {
+
+    private static final String API_URL = "http://127.0.0.1:8000/recibir_datos";
+
+    public static void main(String[] args) throws Exception {
+        // Datos a enviar
+        List<String> columndrop = List.of("column1", "column2");
+        List<String> dummies = List.of("dummy1", "dummy2");
+        String tablename = "example_table";
+        String dfcolumn = "example_column";
+        Map<String, String> newdata = Map.of("key1", "value1", "key2", "value2");
+
+        // Crear el cuerpo de la solicitud JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode requestBody = objectMapper.createObjectNode();
+        requestBody.putPOJO("newdata", newdata);
+
+        // Crear la solicitud HTTP
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI(API_URL + "?columndrop=" + String.join(",", columndrop)
+                        + "&dummies=" + String.join(",", dummies)
+                        + "&tablename=" + tablename
+                        + "&dfcolumn=" + dfcolumn))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+                .build();
+
+        // Enviar la solicitud y obtener la respuesta
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // Procesar la respuesta
+        if (response.statusCode() == 200) {
+            String responseBody = response.body();
+            JsonNode jsonResponse = objectMapper.readTree(responseBody);
+
+            // Imprimir la respuesta deserializada
+            System.out.println("columndrop: " + jsonResponse.get("columndrop").toString());
+            System.out.println("dummies: " + jsonResponse.get("dummies").toString());
+            System.out.println("tablename: " + jsonResponse.get("tablename").asText());
+            System.out.println("dfcolumn: " + jsonResponse.get("dfcolumn").asText());
+            System.out.println("newdata: " + jsonResponse.get("newdata").toString());
+        } else {
+            System.err.println("Error: " + response.statusCode());
+        }
+    }
+}

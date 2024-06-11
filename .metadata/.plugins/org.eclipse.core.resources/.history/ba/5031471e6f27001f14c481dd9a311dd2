@@ -1,0 +1,72 @@
+package test;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.google.gson.Gson;
+
+public class Main {
+    public static void main(String[] args) {
+        String tablename = "salario";
+        String dfcolumn = "Salarios";
+        List<String> columndrop = List.of("Nombre", "Salario");
+        List<String> dummies = List.of("Género", "Departamento");
+        Map<String, Object> newdata = Map.of(
+            "Nombre", "Nuevo",
+            "Edad", 36,
+            "Género", "Femenino",
+            "Departamento", "Finanzas"
+        );
+
+        try {
+            sendPostRequest(tablename, dfcolumn, columndrop, dummies, newdata);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sendPostRequest(String tablename, String dfcolumn, List<String> columndrop, List<String> dummies, Map<String, Object> newdata) throws Exception {
+        String apiUrl = "http://localhost:8000/api/echo";
+
+        URL url = new URL(apiUrl);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+
+        List<String> newcolumndrop = new ArrayList<>(columndrop);
+        List<String> newdummies = new ArrayList<>(dummies);
+
+        Map<String, Object> postData = new HashMap<>();
+        postData.put("tablename", tablename);
+        postData.put("dfcolumn", dfcolumn);
+        postData.put("newcolumndrop", newcolumndrop);
+        postData.put("newdummies", newdummies);
+        postData.put("newdata", newdata);
+
+        Gson gson = new Gson();
+        String jsonData = gson.toJson(postData);
+
+        con.setDoOutput(true);
+        try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+            wr.write(jsonData.getBytes(StandardCharsets.UTF_8));
+            wr.flush();
+        }
+
+        StringBuilder response = new StringBuilder();
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+        }
+
+        System.out.println(response.toString());
+    }
+}

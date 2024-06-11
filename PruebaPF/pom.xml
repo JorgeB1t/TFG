@@ -11,5 +11,10 @@
     <artifactId>jfreechart</artifactId>
     <version>1.0.13</version>
 </dependency>
+  	<dependency>
+  		<groupId>FinalProyect</groupId>
+  		<artifactId>FinalProyect</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
   </dependencies>
 </project>

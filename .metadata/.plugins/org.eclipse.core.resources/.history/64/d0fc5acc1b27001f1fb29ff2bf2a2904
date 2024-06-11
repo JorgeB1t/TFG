@@ -1,0 +1,63 @@
+package test;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Test2 {
+	 public static void main(String[] args) {
+	        try {
+	            // Parámetros a enviar
+	            Map<String, String> diccionario = new HashMap<>();
+	            diccionario.put("clave1", "valor1");
+	            diccionario.put("clave2", "valor2");
+
+	            List<Integer> lista1 = List.of(1, 2, 3, 4, 5);
+	            List<String> lista2 = List.of("a", "b", "c", "d", "e");
+
+	            String cadena = "Hola desde Java";
+
+	            // Construir el JSON con los parámetros
+	            Gson gson = new GsonBuilder().create();
+	            String json = gson.toJson(Map.of("diccionario", diccionario, "lista1", lista1, "lista2", lista2, "cadena", cadena));
+
+	            // Construir la URL de la API de Python con FastAPI
+	            String apiUrl = "http://localhost:8000/datos";
+
+	            URL url = new URL(apiUrl);
+
+	            // Abrir conexión HTTP
+	            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+	            con.setRequestMethod("POST");
+	            con.setRequestProperty("Content-Type", "application/json");
+
+	            // Habilitar el envío de datos
+	            con.setDoOutput(true);
+
+	            // Enviar los datos al servidor
+	            try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+	                wr.write(json.getBytes("UTF-8"));
+	            }
+
+	            // Leer la respuesta
+	            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+	            String inputLine;
+	            StringBuilder response = new StringBuilder();
+	            while ((inputLine = in.readLine()) != null) {
+	                response.append(inputLine);
+	            }
+	            in.close();
+
+	            // Imprimir la respuesta
+	            System.out.println("Respuesta de la API de Python con FastAPI:");
+	            System.out.println(response.toString());
+	        } catch (Exception e) {
+	            System.err.println("Error al llamar a la API de Python con FastAPI: " + e.getMessage());
+	        }
+	    }
+	}
