@@ -3,11 +3,9 @@ INDEX VERSION 1.134+C:\Users\Jorge\eclipse-workspace\Proyecto\.metadata\.plugins
 3961073885.index
 2147927095.index
 127853857.index
-1413457928.index
 1965604948.index
 4091934224.index
 4161555201.index
-2881345321.index
 1787280862.index
 3359449329.index
 2141426391.index

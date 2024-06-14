@@ -6,6 +6,8 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import Backend.*;
@@ -16,7 +18,6 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,26 +38,35 @@ public class Main extends JFrame {
 	private static JTable tabla;
 	private static DefaultTableModel dtm;
 	static String path;
-	private JButton testboton;
 	private static JFileChooser archivo;
 	static String url = "jdbc:mariadb://localhost:3307/tfg";
 	static String user = "root";
 	static String password = "admin";
 	static String tableName;
 	private JList<String> list;
-	private JComboBox comboBox_1;
+	private JComboBox<String> comboBox_1;
 	private static JTabbedPane tabbedPane;
 	private JPanel panel;
-	private JComboBox comboBox;
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
 	private JPanel panel_1;
-	private JList list_1;
+	private JList<String> list_1;
 	private JPanel panel_2;
-	private JTextPane textPane;
+	private static JTextPane textPane;
 	private JComboBox<String> comboBox_1_1;
 	private JButton btnpredecir;
 	private JTree tree;
+	private JButton btnactualizar;
+	private JButton btnañadir;
+	private JButton btnborrar;
+	private JSeparator separator_1;
+	private JSeparator separator;
+	private JLabel lblSeleccioneLaColumna;
+	private JLabel lblNewLabel_1;
+	private JLabel lblNewLabel_2;
+	private JLabel lblNewLabel_3;
+	private JButton btninfo_1;
+	private JButton btnNewButton;
 
 	public static void writetable(String path) {
 		try {
@@ -94,29 +104,32 @@ public class Main extends JFrame {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	public Main() throws SQLException {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1024, 768);
 		contentPane = new JPanel();
+		contentPane.setBackground(new Color(135, 206, 250));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
 		panel_1 = new JPanel();
-		panel_1.setBounds(177, 518, 297, 178);
+		panel_1.setBackground(new Color(135, 206, 235));
+		panel_1.setBounds(309, 507, 297, 189);
 		contentPane.add(panel_1);
 		panel_1.setLayout(null);
 
 		splist = new JScrollPane(); // Necesita un ScrollPane
-		splist.setBounds(10, 10, 108, 158);
+		splist.setBounds(10, 31, 108, 158);
 		panel_1.add(splist);
-
-		list = new JList<String>();
-		splist.setViewportView(list);
-		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		
+				list = new JList<String>();
+				splist.setViewportView(list);
+				list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		comboBox_1 = new JComboBox<String>();
-		comboBox_1.setBounds(141, 11, 135, 22);
+		comboBox_1.setBounds(141, 29, 135, 22);
 		panel_1.add(comboBox_1);
 
 		tree = defs.createDatabaseTree(url, user, password, "tfg");
@@ -163,6 +176,7 @@ public class Main extends JFrame {
 		});
 		tree.setBounds(0, 0, 140, 696);
 		sptree = new JScrollPane(tree); // Necesita un ScrollPane
+		sptree.setBackground(new Color(135, 206, 235));
 		sptree.setBounds(0, 0, 140, 696);
 		contentPane.add(sptree);
 
@@ -172,28 +186,29 @@ public class Main extends JFrame {
 		panel.setLayout(null);
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBackground(new Color(135, 206, 235));
 		tabbedPane.setBounds(0, 0, 808, 484);
 		panel.add(tabbedPane);
 
 
-//
-//		// Crear el gráfico utilizando los datos del conjunto de datos
-//		grafico = ChartFactory.createBarChart("Mi Gráfico", "Día", "Valor", dcds, PlotOrientation.VERTICAL, true, false,
-//				false);
-//		grafico.setBackgroundPaint(Color.WHITE); // Cambia el color de fondo del gráfico a blanco
-//
-//		ChartPanel chartPanel = new ChartPanel(grafico);
-//		chartPanel.setBackground(Color.WHITE);
-//		tabbedPane.addTab("Tabla", null, chartPanel, null);
 
-		JButton btntable = new JButton("Mostrar tabla");
+		JButton btntable = new JButton("Crear tabla");
 		btntable.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
+				
+				if(tableName==null){
+					JOptionPane.showMessageDialog(null, "Seleccione una tabla", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}else {
+				
+				
 				List<String> selectedValuesList = list.getSelectedValuesList();
 				String[] selectedValuesArray = selectedValuesList.toArray(new String[0]);
 
 				// Obtener la columna seleccionada del JComboBox
 				int columna = comboBox_1.getSelectedIndex();
+				String ncolumna =(String) comboBox_1.getSelectedItem();
 
 				// Crear un array para almacenar los datos como cadenas de texto
 				String[] datos = new String[dtm.getRowCount()];
@@ -227,19 +242,37 @@ public class Main extends JFrame {
 				}
 
 				// Ahora puedes usar datosFiltradosDouble en createChart
-				createChart(datosFiltradosDouble, selectedValuesArray, datos);
+				createChart(datosFiltradosDouble, selectedValuesArray, datos,tableName,ncolumna);
 			}
-
+			}
 		});
-		btntable.setBounds(141, 135, 135, 33);
+		btntable.setBounds(141, 62, 135, 33);
 		panel_1.add(btntable);
+		
+		lblNewLabel_2 = new JLabel("Columnas a mostrar");
+		lblNewLabel_2.setBounds(23, 6, 95, 14);
+		panel_1.add(lblNewLabel_2);
+		
+		lblNewLabel_3 = new JLabel("Columna a compar");
+		lblNewLabel_3.setBounds(156, 6, 92, 14);
+		panel_1.add(lblNewLabel_3);
+		
+		btninfo_1 = new JButton("info");
+		btninfo_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				
+			}
+		});
+		btninfo_1.setBounds(187, 155, 89, 23);
+		panel_1.add(btninfo_1);
 
 		dtm = new DefaultTableModel() {
 			private static final long serialVersionUID = 1L;
 
 			@Override // Método para hacer las celdas no editables con FALSE
 			public boolean isCellEditable(int row, int column) {
-				return false;
+				return true;
 			}
 
 			@Override // Método indica que los datos han cambiado
@@ -247,7 +280,6 @@ public class Main extends JFrame {
 				super.fireTableDataChanged();
 			}
 
-			@SuppressWarnings("unchecked")
 			@Override // Método que transforma los booleanos en JCheckBox
 			public Class<Object> getColumnClass(int c) {
 				return (Class<Object>) getValueAt(0, c).getClass();
@@ -267,6 +299,7 @@ public class Main extends JFrame {
 			public void fireTableStructureChanged() {
 				super.fireTableStructureChanged();
 			}
+			
 		};
 		tabla = new JTable(dtm);
 		tabla.setShowVerticalLines(true); // Si muestra líneas verticales
@@ -283,206 +316,271 @@ public class Main extends JFrame {
 		sp = new JScrollPane(tabla); // Necesita un ScrollPane
 		sp.setBounds(20, 20, 550, 90);
 		tabbedPane.addTab("Tabla", null, sp, null); // Agrega el sp
+		
+				panel_2 = new JPanel();
+				panel_2.setBackground(new Color(135, 206, 235));
+				tabbedPane.addTab("Prediccion", null, panel_2, null);
+				panel_2.setLayout(null);
+				
+						textPane = new JTextPane();
+						textPane.setEnabled(false);
+						textPane.setEditable(false);
+						textPane.setBackground(Color.BLACK);
+						textPane.setForeground(Color.WHITE);
+						textPane.setBounds(412, 10, 381, 435);
+						
+								JScrollPane scrollPane = new JScrollPane(textPane);
+								scrollPane.setBounds(412, 10, 381, 436);
+								panel_2.add(scrollPane);
+								
+										JScrollPane splist_1 = new JScrollPane();
+										splist_1.setBounds(21, 46, 108, 158);
+										panel_2.add(splist_1);
+										
+												list_1 = new JList<String>();
+												splist_1.setViewportView(list_1);
+												
+														comboBox_1_1 = new JComboBox<String>();
+														comboBox_1_1.setBounds(212, 44, 135, 22);
+														panel_2.add(comboBox_1_1);
+														
+																JButton btninfo = new JButton("info");
+																btninfo.addActionListener(new ActionListener() {
+																	public void actionPerformed(ActionEvent e) {
 
-		panel_2 = new JPanel();
-		tabbedPane.addTab("Prediccion", null, panel_2, null);
-		panel_2.setLayout(null);
+																		JOptionPane.showMessageDialog(null, "<html>Para realizar una buena prediccion sin errores, es necesario <br>seleccionar correctamente"
+																				+ "las columnas utiles ha predecir.<br>"
+																				+ "Este algoritmo solo funciona provisionalmente con valores numericos, <br>para el correcto uso,"
+																				+ "seleccione solo las columnas númericas</html>", "Informacion",
+																				JOptionPane.INFORMATION_MESSAGE);
 
-		textPane = new JTextPane();
-		textPane.setBackground(Color.BLACK);
-		textPane.setForeground(Color.WHITE);
-		textPane.setBounds(412, 10, 381, 435);
+																	}
+																});
+																btninfo.setBounds(228, 101, 89, 23);
+																panel_2.add(btninfo);
+																
+																		btnpredecir = new JButton("Predecir");
+																		btnpredecir.addActionListener(new ActionListener() {
+																			public void actionPerformed(ActionEvent e) {
 
-		JScrollPane scrollPane = new JScrollPane(textPane);
-		scrollPane.setBounds(412, 10, 381, 436);
-		panel_2.add(scrollPane);
 
-		JScrollPane splist_1 = new JScrollPane();
-		splist_1.setBounds(10, 11, 108, 158);
-		panel_2.add(splist_1);
+																				if(tableName==null) {
+																					appendText("Seleccione una tabla\n");
+																				}else {
+																				
+																			    String valorPredecir = comboBox_1_1.getSelectedItem().toString();
 
-		list_1 = new JList();
-		splist_1.setViewportView(list_1);
+																			    // Obtener el modelo de la JList
+																			    ListModel<String> model = list_1.getModel();
 
-		comboBox_1_1 = new JComboBox<String>();
-		comboBox_1_1.setBounds(10, 232, 135, 22);
-		panel_2.add(comboBox_1_1);
+																			    // Obtener todos los valores disponibles en la JList
+																			    List<String> allValuesList = new ArrayList<>();
+																			    for (int i = 0; i < model.getSize(); i++) {
+																			        allValuesList.add(model.getElementAt(i));
+																			        System.out.println(allValuesList.get(i));
+																			    }
+																			    String[] allValuesArray = allValuesList.toArray(new String[allValuesList.size()]);
+																			    
+																			    
+																			    // Obtener los valores seleccionados en la JList
+																			    List<String> selectedValuesList = new ArrayList<>();
+																			    int[] selectedIndices = list_1.getSelectedIndices();
+																			    for (int index : selectedIndices) {
+																			        selectedValuesList.add(model.getElementAt(index));
+																			    }
 
-		JButton btninfo = new JButton("info");
-		btninfo.addActionListener(new ActionListener() {
+																			    // Eliminar los valores seleccionados en la JList de la lista de todos los valores disponibles
+																			    allValuesList.removeAll(selectedValuesList);
+
+																			    // Verificar si el valor seleccionado en el JComboBox no está seleccionado en la JList
+																			    if (!selectedValuesList.contains(valorPredecir)) {
+																			        // Agregar el valor seleccionado en el JComboBox a la lista de valores no seleccionados
+																			        allValuesList.add(valorPredecir);
+																			    }
+
+																			    // Imprimir los valores seleccionados en la lista
+																			    System.out.println("Valores seleccionados en la lista:");
+																			    for (String value : selectedValuesList) {
+																			        System.out.println(value);
+																			    }
+
+																			    // Imprimir los valores no seleccionados en la JList (incluyendo el seleccionado en el JComboBox si es necesario)
+																			    System.out.println("Valores no seleccionados en la JList:");
+																			    for (String value : allValuesList) {
+																			        System.out.println(value);
+																			    }
+																			    
+
+
+
+																			    Map<String, Object> datos = new HashMap<>();
+																			    
+																			    // Imprimir el índice seleccionado en el ComboBox
+																			    System.out.println("Índice seleccionado en el ComboBox: " + valorPredecir);
+																				System.out.println("=====================================================================");
+																				for (String value : allValuesArray) {
+																					if (!value.equals(valorPredecir)) {
+																					
+																						System.out.println(value);
+
+																						Object input =JOptionPane.showInputDialog("dime un valor para el dato "+value);
+																						
+																						datos.put(value, input);
+																					}
+																				}
+																				System.out.println(datos);
+																				System.out.println("==========================================================================================================");
+																		        System.out.println("Datos ingresados:");
+																		        for (Entry<String, Object> entry : datos.entrySet()) {
+																		            System.out.println(entry.getKey() + ": " + entry.getValue());
+																		           
+																		        }
+
+																				System.out.println("==========================================================================================================");
+																		        System.out.println("Verificacion de dato numerico");
+																				System.out.println("==========================================================================================================");
+
+																		        
+
+
+																		        	
+																		        
+																		        //comprbar si la tabla tiene numeros
+																		        
+																		        
+																		        System.out.println(tableName);
+																		        System.out.println(valorPredecir);
+																		        System.out.println(allValuesList);
+																		        System.out.println(selectedValuesList);
+																		        System.out.println(datos);
+
+																		    	 
+																		        List<String> dummies = List.of();
+																		        try {
+																		        	
+																		           // List<String> dummies1 = List.of("Género", "Departamento");
+																		        	System.out.println();
+																		        	String salida =	defs.sendPostRequest(tableName, valorPredecir, allValuesList, dummies, datos);
+																					//String salida = defs.sendPostRequest(tableName, valorPredecir, allValuesList, dummies, datos);
+																					 //textPane.setText(salida);
+																					 
+																					 appendText(salida+"\n");
+																					 appendText("Datos totales de la nueva fila:\n");
+																					 
+																					 
+																					 
+																					 
+																				} catch (Exception e1) {
+																					// TODO Auto-generated catch block
+																					e1.printStackTrace();
+																					appendText("Error al introducir valores. Por favor, intentelo de nuevo\n");
+																				}
+																		        
+																		        
+																				}
+																		        
+																			}
+																		});
+																		btnpredecir.setBounds(10, 412, 392, 34);
+																		panel_2.add(btnpredecir);
+																		
+																		separator = new JSeparator();
+																		separator.setBackground(new Color(230, 230, 250));
+																		separator.setBounds(10, 366, 394, 9);
+																		separator.setOpaque(true);
+																		panel_2.add(separator);
+																		
+																		JLabel lblNewLabel = new JLabel("Seleccione las columnas \r\n");
+																		lblNewLabel.setBounds(10, 10, 145, 14);
+																		panel_2.add(lblNewLabel);
+																		
+																		lblSeleccioneLaColumna = new JLabel("Seleccione la columna a predecir\r\n");
+																		lblSeleccioneLaColumna.setBounds(175, 19, 215, 14);
+																		panel_2.add(lblSeleccioneLaColumna);
+																		
+																		btnNewButton = new JButton("Probar conexión");
+																		btnNewButton.addActionListener(new ActionListener() {
+																			public void actionPerformed(ActionEvent e) {
+																				
+																				try {
+																					String testresult = defs.sendGetRequest();
+																					appendText(testresult);
+
+																				} catch (IOException
+																						| InterruptedException e1) {
+																					appendText("Error al establecer connexion, revise la configuracion y vuelve a intentarlo");
+																					//e1.printStackTrace();
+																				}
+																			}
+																		});
+																		btnNewButton.setBounds(10, 331, 145, 22);
+																		panel_2.add(btnNewButton);
+		
+		btnactualizar = new JButton("Actualizar tabla");
+		btnactualizar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
-				JOptionPane.showMessageDialog(null, "Este es un mensaje informativo", "Mensaje",
-						JOptionPane.INFORMATION_MESSAGE);
-
+				
+				if(tableName==null){
+					JOptionPane.showMessageDialog(null, "Seleccione una tabla", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}else {
+				
+				  defs.actualizarTablaDesdeJTable(tableName, tabla,url, user, password);
+				}
 			}
 		});
-		btninfo.setBounds(10, 265, 89, 23);
-		panel_2.add(btninfo);
-
-		btnpredecir = new JButton("Predecir");
-		btnpredecir.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				/*
-				 * datos necesarios:
-				 * 
-				 * dicionario con la nueva columna lista o array con las columnas utiles para
-				 * predecir columna a predecir
-				 * 
-				 */
-				 // Obtener el índice seleccionado en el ComboBox
-			    String valorPredecir = comboBox_1_1.getSelectedItem().toString();
-
-			    // Obtener el modelo de la JList
-			    ListModel<String> model = list_1.getModel();
-
-			    // Obtener todos los valores disponibles en la JList
-			    List<String> allValuesList = new ArrayList<>();
-			    for (int i = 0; i < model.getSize(); i++) {
-			        allValuesList.add(model.getElementAt(i));
-			        System.out.println(allValuesList.get(i));
-			    }
-			    String[] allValuesArray = allValuesList.toArray(new String[allValuesList.size()]);
-			    
-			    
-			    // Obtener los valores seleccionados en la JList
-			    List<String> selectedValuesList = new ArrayList<>();
-			    int[] selectedIndices = list_1.getSelectedIndices();
-			    for (int index : selectedIndices) {
-			        selectedValuesList.add(model.getElementAt(index));
-			    }
-
-			    // Eliminar los valores seleccionados en la JList de la lista de todos los valores disponibles
-			    allValuesList.removeAll(selectedValuesList);
-
-			    // Verificar si el valor seleccionado en el JComboBox no está seleccionado en la JList
-			    if (!selectedValuesList.contains(valorPredecir)) {
-			        // Agregar el valor seleccionado en el JComboBox a la lista de valores no seleccionados
-			        allValuesList.add(valorPredecir);
-			    }
-
-			    // Imprimir los valores seleccionados en la lista
-			    System.out.println("Valores seleccionados en la lista:");
-			    for (String value : selectedValuesList) {
-			        System.out.println(value);
-			    }
-
-			    // Imprimir los valores no seleccionados en la JList (incluyendo el seleccionado en el JComboBox si es necesario)
-			    System.out.println("Valores no seleccionados en la JList:");
-			    for (String value : allValuesList) {
-			        System.out.println(value);
-			    }
-			    
-
-
-
-			    Map<String, Object> datos = new HashMap<>();
-			    
-			    // Imprimir el índice seleccionado en el ComboBox
-			    System.out.println("Índice seleccionado en el ComboBox: " + valorPredecir);
-				System.out.println("=====================================================================");
-				for (String value : allValuesArray) {
-					if (!value.equals(valorPredecir)) {
-					
-						System.out.println(value);
-
-						Object input =JOptionPane.showInputDialog("dime un valor para el dato "+value);
-						
-						datos.put(value, input);
-					}
-				}
-				System.out.println(datos);
-				System.out.println("==========================================================================================================");
-		        System.out.println("Datos ingresados:");
-		        for (Entry<String, Object> entry : datos.entrySet()) {
-		            System.out.println(entry.getKey() + ": " + entry.getValue());
-		           
-		        }
-				/*
-				 * valor a predecir = selectedComboBoxItem 
-				 * valor utiles en la aprediccion = selectedValuesList
-				 *  valores no utiles en la prediccion = notSelectedValuesList
-				 * diccionario con todos lo valores nuevos
-				 * nombre de la tabla
-				 * 
-				 * 
-				 */
-				System.out.println("==========================================================================================================");
-		        System.out.println("Verificacion de dato numerico");
-				System.out.println("==========================================================================================================");
-
-		        List<String> dummies = new ArrayList<>();
-		        
-		        for (int i = 0; i < selectedValuesList.size(); i++) {
-					if(!defs.isColumnNumeric("profesiones",selectedValuesList.get(i))) {
-						System.out.println("la columna "+selectedValuesList.get(i)+" no es numerica");
-						dummies.add(selectedValuesList.get(i));
-					}
-				}
-
-		        	
-		        
-		        //comprbar si la tabla tiene numeros
-		        
-		        
-		        
-		    	  String tablename = "salarios";
-		          String dfcolumn = "Salario";
-		          List<String> columndrop = List.of("Nombre", "Salario");
-		          List<String> dummies1 = List.of("Género", "Departamento");
-		          Map<String, Object> newdata = Map.of(
-		              "Nombre", "Nuevo",
-		              "Edad", 36,
-		              "Género", "Femenino",
-		              "Departamento", "Finanzas"
-		          );
-		        
-		        try {
-		        	
-		           // List<String> dummies1 = List.of("Género", "Departamento");
-		        	System.out.println();
-		        	String salida =	defs.sendPostRequest(tablename, dfcolumn, columndrop, dummies1, newdata);
-					//String salida = defs.sendPostRequest(tableName, valorPredecir, allValuesList, dummies, datos);
-					 textPane.setText(salida);
-					 
-				} catch (Exception e1) {
+		btnactualizar.setBounds(804, 525, 127, 28);
+		contentPane.add(btnactualizar);
+		
+		btnañadir = new JButton("Añadir fila");
+		btnañadir.addActionListener(new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		    	
+		    	if(tableName==null) {
+		    		JOptionPane.showMessageDialog(null, "Seleccione una tabla", "Error",
+							JOptionPane.ERROR_MESSAGE);
+		    	}else {
+                Object[] emptyRow;
+				try {
+					emptyRow = new Object[defs.getColumnNames(url, user, password, tableName).length];
+					dtm.addRow(emptyRow);
+				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-		        
-		        
-		        
-		        
+		    	}
+		    }
+		});
+		btnañadir.setBounds(804, 567, 127, 28);
+		contentPane.add(btnañadir);
+
+
+		
+		btnborrar = new JButton("Eliminar fila");
+		btnborrar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				defs.deleteSelectedRow(tabla);
 			}
 		});
-		btnpredecir.setBounds(10, 412, 392, 34);
-		panel_2.add(btnpredecir);
+		btnborrar.setBounds(804, 610, 127, 28);
+		contentPane.add(btnborrar);
 		
-		JScrollPane splist_1_1 = new JScrollPane();
-		splist_1_1.setBounds(222, 32, 108, 158);
-		panel_2.add(splist_1_1);
+		separator_1 = new JSeparator();
+		separator_1.setBackground(new Color(230, 230, 250));
+		separator_1.setBounds(787, 518, 7, 178);
+		separator_1.setOpaque(true);
+		contentPane.add(separator_1);
+		
+		lblNewLabel_1 = new JLabel("<HTML>CREACIÓN DE TABLA DE VALORES</HTML>");
+		lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 27));
+		lblNewLabel_1.setBounds(150, 507, 149, 189);
+		contentPane.add(lblNewLabel_1);
 
 		setVisible(true);
 
-		comboBox = new JComboBox();
-		comboBox.setBounds(781, 506, 204, 22);
-		contentPane.add(comboBox);
-
-		testboton = new JButton("test");
-		testboton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-  
-				
-				
-				
-
-			}
-		});
-		testboton.setBounds(874, 552, 89, 23);
-		contentPane.add(testboton);
-
 		menuBar = new JMenuBar();
+		menuBar.setBackground(new Color(135, 206, 235));
 		setJMenuBar(menuBar);
 		
 		
@@ -512,7 +610,10 @@ public class Main extends JFrame {
 
 					writetable(path);
 					
-					tree = defs.createDatabaseTree(url, user, password, "tfg");
+					JOptionPane.showMessageDialog(null, "Reiniciando la aplicacion", "Reinicio requerido",
+							JOptionPane.INFORMATION_MESSAGE);
+					
+					restartApplication();
 
 				} else if (r == JFileChooser.CANCEL_OPTION) { // Si se cancela
 					JOptionPane.showMessageDialog(null, "Ha cancelado su selección");
@@ -520,6 +621,7 @@ public class Main extends JFrame {
 					JOptionPane.showMessageDialog(null, "Error en la selección");
 				}
 			}
+
 		});
 		fileMenu.add(newItem);
 
@@ -539,12 +641,16 @@ public class Main extends JFrame {
                 } else {
                     JOptionPane.showMessageDialog(null, "El nombre de la tabla no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
+                
+                JOptionPane.showMessageDialog(null, "Reiniciando la aplicacion", "Reinicio requerido",
+						JOptionPane.INFORMATION_MESSAGE);
+				
+				restartApplication();
             }
+            
+            
         });
         fileMenu.add(deleteItem);
-
-		JMenuItem saveItem = new JMenuItem("Guardar");
-		fileMenu.add(saveItem);
 
 		JMenuItem exitItem = new JMenuItem("Salir");
 		fileMenu.add(exitItem);
@@ -557,9 +663,16 @@ public class Main extends JFrame {
 	}
 
 	
-
+    public static void appendText(String text) {
+        Document doc = textPane.getDocument();
+        try {
+            doc.insertString(doc.getLength(), text, null);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+    }
 	
-	public static void createChart(Double[][] datosfiltrados, String[] rowLabels, String[] columnLabels) {
+	public static void createChart(Double[][] datosfiltrados, String[] rowLabels, String[] columnLabels,String tablename,String columna) {
 		// Crear el dataset para el gráfico
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
@@ -571,8 +684,8 @@ public class Main extends JFrame {
 		}
 
 		// Crear el gráfico de barras
-		JFreeChart barChart = ChartFactory.createBarChart("Array Bidimensional", // Título del gráfico
-				"Categoría", // Etiqueta del eje X
+		JFreeChart barChart = ChartFactory.createBarChart(tablename, // Título del gráfico
+				columna, // Etiqueta del eje X
 				"Valor", // Etiqueta del eje Y
 				dataset, // Datos
 				PlotOrientation.VERTICAL, true, // Incluir leyenda
@@ -587,5 +700,24 @@ public class Main extends JFrame {
 
 		// Agregar el ChartPanel al tabbedPane
 		tabbedPane.addTab("Gráfico de Barras", chartPanel);
+	}
+	
+	public void restartApplication() {
+	    // Ocultar la ventana actual
+	    setVisible(false);  // Suponiendo que estás en una clase que extiende JFrame o similar
+	    
+	    // Reiniciar la aplicación
+	    try {
+	        String javaHome = System.getProperty("java.home");
+	        String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
+	        String className = getClass().getName();
+
+	        ProcessBuilder builder = new ProcessBuilder(javaBin, "-cp", System.getProperty("java.class.path"), className);
+	        Process process = builder.start();
+	        process.waitFor();
+	        System.exit(0);
+	    } catch (IOException | InterruptedException e) {
+	        e.printStackTrace();
+	    }
 	}
 }

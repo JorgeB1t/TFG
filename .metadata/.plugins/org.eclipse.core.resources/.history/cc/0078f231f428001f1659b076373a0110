@@ -1,0 +1,104 @@
+package test;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.google.gson.Gson;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+    	
+    	
+    	  String tablename = "jugadores";
+          String dfcolumn = "Goles";
+          List<String> columndrop = List.of("Nombre", "Goles");
+          List<String> dummies = List.of();
+          Map<String, Object> newdata = Map.of(
+        		  
+        	            "Nombre del Jugador", "Juan Pérez",
+        	            "Asistencias", 33,
+        	            "Remates", 3,
+        	            "Faltas", 343
+        	        
+          );
+    	
+        // Datos que enviarás a la API
+//        String textData1 = "Hello, FastAPI!";
+//        String textData2 = "Another string";
+//        List<String> listData1 = List.of("1", "2", "3");
+//        List<String> listData2 = List.of("apple", "banana", "orange");
+//        Map<String, Object> mapData = new HashMap<>();
+//        mapData.put("key1", "value1");
+//        mapData.put("key2", 2); // Ejemplo de valor Object diferente a String
+
+        // Llamar al método para enviar datos a la API
+          
+          System.out.println(tablename);
+          System.out.println(dfcolumn);
+
+          System.out.println(columndrop);
+
+          System.out.println(dummies);
+
+          System.out.println(newdata);
+
+          
+        sendPostRequest(tablename, dfcolumn, columndrop, dummies, newdata);
+    }
+
+    public static String sendPostRequest(String tablename, String dfcolumn, List<String> columndrop, List<String> dummies, Map<String, Object> newdata) throws Exception {
+        // Verificar que las cadenas lleguen correctamente
+
+        
+        // URL de la API FastAPI
+        String apiUrl = "http://localhost:8000/api/echo";
+
+        URL url = new URL(apiUrl);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+        // Configurar el encabezado y el método de solicitud
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+
+        // Convertir las listas a nuevas instancias de ArrayList para evitar problemas con el tipo de lista
+        List<String> newcolumndrop = new ArrayList<>(columndrop);
+        List<String> newdummies = new ArrayList<>(dummies);
+
+        // Datos que enviarás a la API
+        Map<String, Object> postData = new HashMap<>();
+        postData.put("textData1", tablename);
+        postData.put("textData2", dfcolumn);
+        postData.put("listData1", newcolumndrop);
+        postData.put("listData2", newdummies);
+        postData.put("mapData", newdata);
+
+        // Convertir el objeto a formato JSON
+        Gson gson = new Gson();
+        String jsonData = gson.toJson(postData);
+
+        // Enviar datos a la API
+        con.setDoOutput(true);
+        try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+            wr.write(jsonData.getBytes(StandardCharsets.UTF_8));
+            wr.flush();
+        }
+
+        // Leer la respuesta de la API
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            System.out.println(response.toString());
+            return response.toString();
+        }
+    }
+}
+
